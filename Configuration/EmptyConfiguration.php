@@ -36,7 +36,7 @@ class EmptyConfiguration implements ConfigurationInterface
    */
   public function getBacktraceFolder()
   {
-    return $this->container->getParameter('kernel.cache_dir' . '/exceptionhandler');
+    return $this->container->getParameter('kernel.cache_dir') . '/exceptionhandler';
   }
 
   /**

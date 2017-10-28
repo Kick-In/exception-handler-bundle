@@ -68,7 +68,11 @@ class EmptyConfiguration implements ConfigurationInterface
    */
   public function getUserInformation(TokenInterface $token)
   {
-    return 'Unknown user';
+    if ($token !== NULL) {
+      return $token->getUsername();
+    }
+
+    return 'No user';
   }
 
   /**

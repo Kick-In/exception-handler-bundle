@@ -1,11 +1,18 @@
 <?php
 
-namespace KickIn\ExceptionHandlerBundle\Configuration;
+namespace Kickin\ExceptionHandlerBundle\Configuration;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 interface ConfigurationInterface
 {
+  /**
+   * ConfigurationInterface constructor.
+   *
+   * @param ContainerInterface $container
+   */
+  public function __construct(ContainerInterface $container);
 
   /**
    * Indicate whether the current environment is a production environment

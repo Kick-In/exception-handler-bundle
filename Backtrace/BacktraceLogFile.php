@@ -1,6 +1,6 @@
 <?php
 
-namespace KickIn\ExceptionHandlerBundle\Backtrace;
+namespace Kickin\ExceptionHandlerBundle\Backtrace;
 
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;

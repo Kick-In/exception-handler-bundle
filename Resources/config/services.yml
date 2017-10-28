@@ -7,14 +7,15 @@ services:
     public: false
     lazy: true
     arguments:
-      - "@container"
+      - "@service_container"
 
   kickin.exceptionhandler.handler:
     class: Kickin\ExceptionHandlerBundle\Handler\ExceptionHandler
     lazy: true
     public: false
     arguments:
-      - "@mailer"
+      - "@swiftmailer.mailer.exception_mailer"
+      - "@swiftMailer.transport.real"
       - "@security.token_storage"
       - "@twig"
       - "@kickin.exceptionhandler.configuration"

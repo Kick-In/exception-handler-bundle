@@ -1,6 +1,6 @@
 <?php
 
-namespace Kickin\ExceptionHandler;
+namespace Kickin\ExceptionHandlerBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

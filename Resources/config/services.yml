@@ -1,0 +1,22 @@
+parameters:
+  kickin.exceptionhandler.configuration.class: Kickin\ExceptionHandlerBundle\Configuration\EmptyConfiguration
+
+services:
+  kickin.exceptionhandler.configuration:
+    class: "%kickin.exceptionhandler.configuration.class%"
+    public: false
+    lazy: true
+    arguments:
+      - "@container"
+
+  kickin.exceptionhandler.handler:
+    class: Kickin\ExceptionHandlerBundle\Handler\ExceptionHandler
+    lazy: true
+    public: false
+    arguments:
+      - "@mailer"
+      - "@security.token_storage"
+      - "@twig"
+      - "@kickin.exceptionhandler.configuration"
+    tags:
+      - { name: kernel.event_subscriber }

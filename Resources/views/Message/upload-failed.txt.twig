@@ -1,0 +1,8 @@
+Error during exception handling!
+
+- Exception: {{ type }}
+- Exception message: {{ exception }}
+
+For some reason, the uploading of the backtrace failed so maybe you have to have a look at it. Also the server couldn't decide whether the onKernelException was triggered by an HTTP 500 error (for which this script has been built), or some other exception. So here is the backtrace, maybe you can do something with it. The backtrace:
+
+{{ backtrace }}

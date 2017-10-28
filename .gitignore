@@ -39,3 +39,8 @@
 
 # Backup entities generated with doctrine:generate:entities command
 **/Entity/*~
+
+.idea
+composer.lock
+composer.phar
+vendor

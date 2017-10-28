@@ -1,0 +1,28 @@
+{
+  "name": "kick-in/exception-handler-bundle",
+  "description": "This bundles integrates an simple Exception Handler in your Symfony Application, which is capable of mailing the exact problem.",
+  "keywords": ["symfony", "exception handler"],
+  "type": "symfony-bundle",
+  "homepage": "https://github.com/kick-in/exception-handler-bundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Wendo Beuker",
+      "email": "wendo@kick-in.nl"
+    },
+    {
+      "name": "Bob van de Vijver",
+      "email": "bob@kick-in.nl"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "symfony/symfony": ">= 3.0.0",
+    "symfony/swiftmailer-bundle": ">=2.6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kickin\\ExceptionHandlerBundle\\": ""
+    }
+  }
+}

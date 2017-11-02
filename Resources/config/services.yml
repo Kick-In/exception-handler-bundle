@@ -5,7 +5,7 @@ services:
   kickin.exceptionhandler.configuration:
     class: "%kickin.exceptionhandler.configuration.class%"
     public: false
-    lazy: true
+    lazy: false  # This cannot be true as that will throw fatal errors!
     arguments:
       - "@service_container"
 

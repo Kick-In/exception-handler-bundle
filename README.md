@@ -5,6 +5,11 @@ This bundles integrates an simple Exception Handler in your Symfony Application,
 
 In order for this bundle to work, you are required to follow the following steps:
 
+1. Install the bundle:
+```
+php composer.phar require kick-in/exception-handler-bundle
+```
+
 1. Enable the bundle in your `AppKernel.php`
 ```
 $bundles = [

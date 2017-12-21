@@ -45,11 +45,11 @@ interface ConfigurationInterface
   /**
    * Retrieve user information from the token, and return it in a single string
    *
-   * @param TokenInterface $token
+   * @param TokenInterface|null $token
    *
    * @return string
    */
-  public function getUserInformation(TokenInterface $token);
+  public function getUserInformation(TokenInterface $token = null);
 
   /**
    * Retrieve the system version

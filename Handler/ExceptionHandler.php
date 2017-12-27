@@ -122,6 +122,10 @@ class ExceptionHandler implements EventSubscriberInterface
    * in the html status exception handler load the backtrace and send it in an email.
    *
    * @param GetResponseForExceptionEvent $event
+   *
+   * @throws \Twig_Error_Loader
+   * @throws \Twig_Error_Runtime
+   * @throws \Twig_Error_Syntax
    */
   public function onKernelException(GetResponseForExceptionEvent $event)
   {
@@ -241,6 +245,10 @@ class ExceptionHandler implements EventSubscriberInterface
    * @author Wendo
    *
    * @param FilterResponseEvent $responseObject
+   *
+   * @throws \Twig_Error_Loader
+   * @throws \Twig_Error_Runtime
+   * @throws \Twig_Error_Syntax
    */
   public function onKernelResponse(FilterResponseEvent $responseObject)
   {

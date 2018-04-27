@@ -15,7 +15,7 @@ services:
     public: false
     arguments:
       - "@swiftmailer.mailer.exception_mailer"
-      - "@swiftmailer.transport.real"
+      - "@swiftmailer.mailer.exception_mailer.transport.real"
       - "@security.token_storage"
       - "@twig"
       - "@kickin.exceptionhandler.configuration"

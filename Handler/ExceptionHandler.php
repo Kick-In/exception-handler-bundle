@@ -205,7 +205,7 @@ class ExceptionHandler implements EventSubscriberInterface
           ->setSubject("Exception Handler: Failed to upload backtrace")
           ->setFrom($this->configuration->getSender())
           ->setTo($this->configuration->getReceiver())
-          ->setBody($this->twig->render('KickinExceptionHandlerBundle:Message:upload-failed.txt.twig', array(
+          ->setBody($this->twig->render('@KickinExceptionHandler/Message/upload-failed.txt.twig', array(
               'type'      => $uploadExceptionType,
               'exception' => $uploadException->getMessage(),
               'backtrace' => $backtrace->getFileContent(),
@@ -358,7 +358,7 @@ class ExceptionHandler implements EventSubscriberInterface
         ->setSubject("Exception Handler: 500 error at " . $requestUri)
         ->setFrom($this->configuration->getSender())
         ->setTo($this->configuration->getReceiver())
-        ->setBody($this->twig->render('KickinExceptionHandlerBundle:Message:exception.txt.twig', array(
+        ->setBody($this->twig->render('@KickinExceptionHandler/Message/exception.txt.twig', array(
             'user'          => $this->configuration->getUserInformation($this->tokenStorage->getToken()),
             'method'        => $method,
             'baseUrl'       => $baseUrl,

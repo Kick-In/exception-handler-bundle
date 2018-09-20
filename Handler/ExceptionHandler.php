@@ -16,6 +16,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -33,6 +34,7 @@ use Twig_Environment;
  *
  * @author Wendo
  * @author BobV
+ * @author Sven
  */
 class ExceptionHandler implements EventSubscriberInterface
 {
@@ -51,6 +53,7 @@ class ExceptionHandler implements EventSubscriberInterface
   const SESSION_ERROR = "kickin.exceptionhandler.error";
   const SESSION_PREVIOUS_TIME = "kickin.exceptionhandler.previous_time";
   const SESSION_PREVIOUS_HASH = "kickin.exceptionhandler.previous_hash";
+  const EXCEPTION_PRESENCE = 'kickin.exceptionhandler.exception.present';
 
   /**
    * @var Swift_Mailer
@@ -117,9 +120,7 @@ class ExceptionHandler implements EventSubscriberInterface
   }
 
   /**
-   * This function will create create the backtrace and save it with an random
-   * name in /web/uploads/exceptionBacktrace/ and save the name in the session so
-   * in the html status exception handler load the backtrace and send it in an email.
+   * Handles a kernel exception by queueing it for sending
    *
    * @param GetResponseForExceptionEvent $event
    *
@@ -138,15 +139,31 @@ class ExceptionHandler implements EventSubscriberInterface
       return;
     }
 
+    $this->handleException($exception, $event->getRequest()->getSession());
+  }
+
+  /**
+   * This function will create the backtrace and save it with an random
+   * name in /web/uploads/exceptionBacktrace/ and save the name in the session so
+   * in the html status exception handler load the backtrace and send it in an email.
+   *
+   * @param Exception        $exception
+   * @param SessionInterface $session
+   *
+   * @throws \Twig_Error_Loader
+   * @throws \Twig_Error_Runtime
+   * @throws \Twig_Error_Syntax
+   */
+  public function handleException(Exception $exception, SessionInterface $session)
+  {
     // If not production, return
     if (!$this->configuration->isProductionEnvironment()) return;
 
     // Create log file
     $backtrace = new BacktraceLogFile($this->configuration->getBacktraceFolder());
-    $backtrace->setFileContent($this->buildBacktrace($event));
+    $backtrace->setFileContent($this->buildBacktrace($exception));
 
     // Unset the used session variable
-    $session = $event->getRequest()->getSession();
     if ($session) {
       $session->remove(self::SESSION_FILENAME);
       $session->set(self::SESSION_ERROR, $exception->getMessage());
@@ -197,6 +214,7 @@ class ExceptionHandler implements EventSubscriberInterface
       $fileName = $backtrace->getName();
       if ($session) {
         $session->set(self::SESSION_FILENAME, $fileName);
+        $session->set(self::EXCEPTION_PRESENCE, true);
       }
     } else {
       // Uploading went wrong -> just mail the backtrace so we have saved it.
@@ -219,21 +237,21 @@ class ExceptionHandler implements EventSubscriberInterface
   /**
    * This function builds a backtrace
    *
-   * @param GetResponseForExceptionEvent $event
+   * @param Exception $exception
    *
    * @return string
    */
-  private function buildBacktrace(GetResponseForExceptionEvent $event)
+  private function buildBacktrace(Exception $exception)
   {
     $user = $this->configuration->getUserInformation($this->tokenStorage->getToken());
 
     // Build backtrace
-    $comment = "Exception Code: " . $event->getException()->getCode();
-    $comment .= "\nThe class of the exception: " . get_class($event->getException());
+    $comment = "Exception Code: " . $exception->getCode();
+    $comment .= "\nThe class of the exception: " . get_class($exception);
     $comment .= "\nThe user who triggered the exception: " . $user;
-    $comment .= "\nFile in which the exception occured: " . $event->getException()->getFile();
-    $comment .= "\nException message: " . $event->getException()->getMessage();
-    $comment .= "\n\nThe backtrace:\n" . $event->getException()->getTraceAsString();
+    $comment .= "\nFile in which the exceptionvent->getException() occured: " . $exception->getFile();
+    $comment .= "\nException message: " . $exception->getMessage();
+    $comment .= "\n\nThe backtrace:\n" . $exception->getTraceAsString();
 
     return $comment;
   }
@@ -252,11 +270,15 @@ class ExceptionHandler implements EventSubscriberInterface
    */
   public function onKernelResponse(FilterResponseEvent $responseObject)
   {
-    $response   = $responseObject->getResponse();
-    $request    = $responseObject->getRequest();
-    $statusCode = $response->getStatusCode();
-    $session    = $request->getSession();
+    $response = $responseObject->getResponse();
+    $request  = $responseObject->getRequest();
+    $session  = $request->getSession();
 
+    //Check if there is actually an exception to be returned
+    if (!$session->has(self::EXCEPTION_PRESENCE)) return;
+    $session->remove(self::EXCEPTION_PRESENCE);
+
+    //If we're not in production, remove the session file from FS and remove the filename from the session
     if (!$this->configuration->isProductionEnvironment()) {
       // no production! -> don't sent an email
       if (!$session->has(self::SESSION_FILENAME)) return;
@@ -271,11 +293,6 @@ class ExceptionHandler implements EventSubscriberInterface
 
       return;
     }
-
-    // Check if exception is an HTTP 500 error code
-    if ($statusCode != 500) return;
-
-    // HTTP 500 error code found -> send email
 
     // Get the routing and some other stuff out of the request
     $method     = $request->getMethod();

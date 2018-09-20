@@ -13,6 +13,10 @@
     {
       "name": "Bob van de Vijver",
       "email": "bob@kick-in.nl"
+    },
+    {
+      "name": "Sven Mol",
+      "email": "sven@kick-in.nl"
     }
   ],
   "require": {

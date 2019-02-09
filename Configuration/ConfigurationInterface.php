@@ -8,13 +8,6 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 interface ConfigurationInterface
 {
   /**
-   * ConfigurationInterface constructor.
-   *
-   * @param ContainerInterface $container
-   */
-  public function __construct(ContainerInterface $container);
-
-  /**
    * Indicate whether the current environment is a production environment
    *
    * @return bool

@@ -5,9 +5,6 @@ services:
   kickin.exceptionhandler.configuration:
     class: "%kickin.exceptionhandler.configuration.class%"
     public: false
-    lazy: false  # This cannot be true as that will throw fatal errors!
-    arguments:
-      - "@service_container"
 
   kickin.exceptionhandler.handler:
     class: Kickin\ExceptionHandlerBundle\Handler\ExceptionHandler

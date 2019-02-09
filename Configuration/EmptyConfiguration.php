@@ -7,22 +7,6 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class EmptyConfiguration implements ConfigurationInterface
 {
-
-  /**
-   * @var ContainerInterface
-   */
-  private $container;
-
-  /**
-   * EmptyConfiguration constructor.
-   *
-   * @param ContainerInterface $container
-   */
-  public function __construct(ContainerInterface $container)
-  {
-    $this->container = $container;
-  }
-
   /**
    * @inheritdoc
    */
@@ -36,7 +20,7 @@ class EmptyConfiguration implements ConfigurationInterface
    */
   public function getBacktraceFolder()
   {
-    return $this->container->getParameter('kernel.cache_dir') . '/exceptionhandler';
+    return '/tmp/exception-handler';
   }
 
   /**

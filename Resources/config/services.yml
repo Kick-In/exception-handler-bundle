@@ -1,23 +1,7 @@
-parameters:
-  kickin.exceptionhandler.configuration.class: Kickin\ExceptionHandlerBundle\Configuration\EmptyConfiguration
-
 services:
-  kickin.exceptionhandler.configuration:
-    class: "%kickin.exceptionhandler.configuration.class%"
-    public: false
-    lazy: false  # This cannot be true as that will throw fatal errors!
-    arguments:
-      - "@service_container"
-
   kickin.exceptionhandler.handler:
     class: Kickin\ExceptionHandlerBundle\Handler\ExceptionHandler
     lazy: true
     public: false
-    arguments:
-      - "@swiftmailer.mailer.exception_mailer"
-      - "@swiftmailer.mailer.exception_mailer.transport.real"
-      - "@security.token_storage"
-      - "@twig"
-      - "@kickin.exceptionhandler.configuration"
-    tags:
-      - { name: kernel.event_subscriber }
+    autowire: true
+    autoconfigure: true

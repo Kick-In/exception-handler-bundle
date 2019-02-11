@@ -10,7 +10,7 @@ In order for this bundle to work, you are required to follow the following steps
 php composer.phar require kick-in/exception-handler-bundle
 ```
 
-1. Enable the bundle in your `AppKernel.php`
+2. Enable the bundle in your `AppKernel.php`
 ```
 $bundles = [
 ....
@@ -18,7 +18,7 @@ $bundles = [
 ];
 ```
 
-2. Create the `exception_mailer` swiftmailer instance. For example:
+3. Create the `exception_mailer` swiftmailer instance. For example:
 ```yml
 swiftmailer:
     default_mailer: default
@@ -37,15 +37,17 @@ swiftmailer:
         spool: { type: memory }
 ```
 
-3. Implement your custom configuration class. This should implement the `Configuration\ConfigurationInterface`. For 
-an implementation example, have a look at `Configuration\EmptyConfiguration`. Note that the custom file is required:
-it is checked whether the `EmptyConfiguration` is still loaded, which will make this bundle throw an exception if that
-is the case.
+4. Implement your custom configuration service. This should implement the `Configuration\ConfigurationInterface`. It will
+ then be autowired to the `ExceptionHandler`. You can check an example implementation [here](Resources/doc/configuration-example.md).
 
-4. Register your configuration class in the kernel parameters (either `parameters.yml` or `config.yml`):
+6. (Optional) If you don't use autowiring, or need manual configuration for your configuration service, configure your
+configuration service in the regular way. Include the new class in your own `services.yml`, and configure the service as you like:
 ```yml
-parameters:
-    kickin.exceptionhandler.configuration.class: <your_class_here>
+services:
+    <your_class_here>:
+        arguments:
+          $cacheDir: '%kernel.cache_dir%'
+          <argument>: '@someservice'
 ```
 
 That should be it, happy exception mailing!

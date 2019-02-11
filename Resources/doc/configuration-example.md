@@ -1,26 +1,25 @@
+```php
 <?php
 
 namespace Kickin\ExceptionHandlerBundle\Configuration;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
-class EmptyConfiguration implements ConfigurationInterface
+class ExampleConfiguration implements ConfigurationInterface
 {
-
   /**
-   * @var ContainerInterface
+   * @var string
    */
-  private $container;
+  private $cacheDir;
 
   /**
    * EmptyConfiguration constructor.
    *
-   * @param ContainerInterface $container
+   * @param string $cacheDir
    */
-  public function __construct(ContainerInterface $container)
+  public function __construct($cacheDir)
   {
-    $this->container = $container;
+    $this->cacheDir = $cacheDir;
   }
 
   /**
@@ -36,7 +35,7 @@ class EmptyConfiguration implements ConfigurationInterface
    */
   public function getBacktraceFolder()
   {
-    return $this->container->getParameter('kernel.cache_dir') . '/exceptionhandler';
+    return $this->cacheDir . '/exception-handler';
   }
 
   /**
@@ -85,3 +84,5 @@ class EmptyConfiguration implements ConfigurationInterface
     return 'git-hash';
   }
 }
+
+```

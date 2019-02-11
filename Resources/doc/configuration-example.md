@@ -1,11 +1,11 @@
+```php
 <?php
 
 namespace Kickin\ExceptionHandlerBundle\Configuration;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
-class EmptyConfiguration implements ConfigurationInterface
+class ExampleConfiguration implements ConfigurationInterface
 {
   /**
    * @var string
@@ -84,3 +84,5 @@ class EmptyConfiguration implements ConfigurationInterface
     return 'git-hash';
   }
 }
+
+```

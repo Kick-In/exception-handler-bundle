@@ -6,7 +6,6 @@ use DateTime;
 use Exception;
 use Kickin\ExceptionHandlerBundle\Backtrace\BacktraceLogFile;
 use Kickin\ExceptionHandlerBundle\Configuration\ConfigurationInterface;
-use Kickin\ExceptionHandlerBundle\Configuration\EmptyConfiguration;
 use Kickin\ExceptionHandlerBundle\Exceptions\FileAlreadyExistsException;
 use Kickin\ExceptionHandlerBundle\Exceptions\UploadFailedException;
 use Swift_Attachment;
@@ -89,10 +88,6 @@ class ExceptionHandler implements EventSubscriberInterface
   public function __construct(Swift_Mailer $mailer, Swift_Transport $transport, TokenStorageInterface $tokenStorage,
                               Twig_Environment $twig, ConfigurationInterface $configuration)
   {
-    if ($configuration instanceof EmptyConfiguration) {
-      throw new \InvalidArgumentException("You need to create your own configuration class and register it correctly in order to use this bundle!");
-    }
-
     $this->mailer          = $mailer;
     $this->mailerTransport = $transport;
     $this->tokenStorage    = $tokenStorage;

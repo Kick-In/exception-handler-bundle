@@ -3,7 +3,7 @@ This bundles integrates an simple Exception Handler in your Symfony Application,
 
 ## Upgrading
 
-See the [upgrade notes][UPGRADE.md].
+See the [upgrade notes](UPGRADE.md).
 
 ## Installation
 

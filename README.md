@@ -37,24 +37,17 @@ swiftmailer:
         spool: { type: memory }
 ```
 
-4. Implement your custom configuration class. This should implement the `Configuration\ConfigurationInterface`. For
-an implementation example, have a look at `Configuration\EmptyConfiguration`. Note that the custom file is required:
-it is checked whether the `EmptyConfiguration` is still loaded, which will make this bundle throw an exception if that
-is the case.
+4. Implement your custom configuration service. This should implement the `Configuration\ConfigurationInterface`. It will
+ then be autowired to the `ExceptionHandler`. For an implementation example, have a look at `Configuration\EmptyConfiguration`.
 
-5. Register your configuration class in the kernel parameters (either `parameters.yml` or `config.yml`):
-```yml
-parameters:
-    kickin.exceptionhandler.configuration.class: <your_class_here>
-```
-
-6. (Optional) By default, the default configuration doesn't include access to other services in the `Configuration` class.
-Should you require these, include the new class in your own `services.yml` to decorate the default service. If you use autowiring, you're done.
-Otherwise, configure the arguments of your class here as well.
+6. (Optional) If you don't use autowiring, or need manual configuration for your configuration service, configure your
+configuration service in the regular way. Include the new class in your own `services.yml`, and configure the service as you like:
 ```yml
 services:
     <your_class_here>:
-        decorates: kickin.exceptionhandler.configuration
+        arguments:
+          $cacheDir: '%kernel.cache_dir%'
+          <argument>: '@someservice'
 ```
 
 That should be it, happy exception mailing!

@@ -2,9 +2,9 @@
 
 # 2.0
 
-The 2.0 release marks the usage of autowiring for the configuration class. You don't need to change anything if you use autowiring, but you can remove the `kickin.exceptionhandler.configuration.class` parameter from you configuration.
+The 2.0 release marks the usage of autowiring for the configuration class. If you set the `container.autowiring.strict_mode` parameter to true (default for Symfony >=4.0), you need to alias the `Kickin\ExceptionHandlerBundle\Configuration\ConfigurationInterface` class to your configuration class. You can remove the `kickin.exceptionhandler.configuration.class` parameter from your configuration.
 
-If you don't use autowiring, check the installion guide on what you need to register for the bundle to work.
+If you don't use autowiring, check the installation guide on what you need to register for the bundle to work.
 
 # 1.1
 

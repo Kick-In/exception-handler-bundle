@@ -42,7 +42,7 @@ swiftmailer:
 ```
 
 4. Implement your custom configuration service. This should implement the `Configuration\ConfigurationInterface`. It will
- then be autowired to the `ExceptionHandler`. You can check an example implementation [here](Resources/doc/configuration-example.md).
+ then be autowired to the `ExceptionHandler` if you have set `container.autowiring.strict_mode` to false. Otherwise (default in Symfony >=4.0), alias the `Kickin\ExceptionHandlerBundle\Configuration\ConfigurationInterface` service to your custom configuration service. You can check an example implementation [here](Resources/doc/configuration-example.md).
 
 6. (Optional) If you don't use autowiring, or need manual configuration for your configuration service, configure your
 configuration service in the regular way. Include the new class in your own `services.yml`, and configure the service as you like:

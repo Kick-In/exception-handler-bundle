@@ -184,8 +184,6 @@ class ExceptionHandler implements EventSubscriberInterface
       $counter++;
     }
 
-    $uploadExceptionType = get_class($uploadException);
-
     if ($status === self::FILE_SAVE_SUCCESS) {
       // Uploading of the file succeeded
       // Backtrace has been uploaded -> put the address in a session variable
@@ -201,7 +199,7 @@ class ExceptionHandler implements EventSubscriberInterface
           ->setFrom($this->configuration->getSender())
           ->setTo($this->configuration->getReceiver())
           ->setBody($this->twig->render('@KickinExceptionHandler/Message/upload-failed.txt.twig', array(
-              'type'      => $uploadExceptionType,
+              'type'      => $uploadException ? get_class($uploadException) : null,
               'exception' => $uploadException->getMessage(),
               'backtrace' => $backtrace->getFileContent(),
           )));

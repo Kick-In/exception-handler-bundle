@@ -5,3 +5,9 @@ services:
     public: false
     autowire: true
     autoconfigure: true
+    bind:
+      # Explicitly bind the correct mailer, as we do not want the default mailer
+      $mailer: "@swiftmailer.mailer.exception_mailer"
+      # Explicitly bind the correct real transport, as we do not want the default mailer transport
+      # Next to that, we also need the real transport, and not the spool
+      $transport: "@swiftmailer.mailer.exception_mailer.transport.real"

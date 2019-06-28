@@ -8,22 +8,22 @@ use Kickin\ExceptionHandlerBundle\Backtrace\BacktraceLogFile;
 use Kickin\ExceptionHandlerBundle\Configuration\ConfigurationInterface;
 use Kickin\ExceptionHandlerBundle\Exceptions\FileAlreadyExistsException;
 use Kickin\ExceptionHandlerBundle\Exceptions\UploadFailedException;
-use Swift_Attachment;
-use Swift_Mailer;
-use Swift_Transport;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Twig_Environment;
+use Traversable;
 
 /**
  * Description of ExceptionHandler
@@ -52,24 +52,14 @@ class ExceptionHandler implements EventSubscriberInterface
   const SESSION_PREVIOUS_HASH = "kickin.exceptionhandler.previous_hash";
 
   /**
-   * @var Swift_Mailer
+   * @var MailerInterface
    */
   private $mailer;
-
-  /**
-   * @var Swift_Transport
-   */
-  private $mailerTransport;
 
   /**
    * @var TokenStorageInterface
    */
   private $tokenStorage;
-
-  /**
-   * @var Twig_Environment
-   */
-  private $twig;
 
   /**
    * @var ConfigurationInterface
@@ -79,20 +69,15 @@ class ExceptionHandler implements EventSubscriberInterface
   /**
    * Constructor
    *
-   * @param Swift_Mailer           $mailer
-   * @param Swift_Transport        $transport
+   * @param MailerInterface        $mailer
    * @param TokenStorageInterface  $tokenStorage
-   * @param Twig_Environment       $twig
    * @param ConfigurationInterface $configuration
    */
-  public function __construct(Swift_Mailer $mailer, Swift_Transport $transport, TokenStorageInterface $tokenStorage,
-                              Twig_Environment $twig, ConfigurationInterface $configuration)
+  public function __construct(MailerInterface $mailer, TokenStorageInterface $tokenStorage, ConfigurationInterface $configuration)
   {
-    $this->mailer          = $mailer;
-    $this->mailerTransport = $transport;
-    $this->tokenStorage    = $tokenStorage;
-    $this->twig            = $twig;
-    $this->configuration   = $configuration;
+    $this->mailer        = $mailer;
+    $this->tokenStorage  = $tokenStorage;
+    $this->configuration = $configuration;
   }
 
   /**
@@ -116,13 +101,12 @@ class ExceptionHandler implements EventSubscriberInterface
    * name in /web/uploads/exceptionBacktrace/ and save the name in the session so
    * in the html status exception handler load the backtrace and send it in an email.
    *
-   * @param GetResponseForExceptionEvent $event
+   * @param ExceptionEvent $event
    *
-   * @throws \Twig_Error_Loader
-   * @throws \Twig_Error_Runtime
-   * @throws \Twig_Error_Syntax
+   * @throws TransportExceptionInterface
+   * @throws Exception
    */
-  public function onKernelException(GetResponseForExceptionEvent $event)
+  public function onKernelException(ExceptionEvent $event)
   {
     // Skip some exception types directly
     $exception = $event->getException();
@@ -194,29 +178,30 @@ class ExceptionHandler implements EventSubscriberInterface
     } else {
       // Uploading went wrong -> just mail the backtrace so we have saved it.
       // Build email
-      $message = $this->mailer->createMessage()
-          ->setSubject("Exception Handler: Failed to upload backtrace")
-          ->setFrom($this->configuration->getSender())
-          ->setTo($this->configuration->getReceiver())
-          ->setBody($this->twig->render('@KickinExceptionHandler/Message/upload-failed.txt.twig', array(
+      $email = (new TemplatedEmail())
+          ->subject("Exception Handler: Failed to upload backtrace")
+          ->from($this->configuration->getSender())
+          ->to($this->configuration->getReceiver())
+          ->textTemplate('@KickinExceptionHandler/Message/upload-failed.txt.twig')
+          ->context([
               'type'      => $uploadException ? get_class($uploadException) : NULL,
               'exception' => $uploadException->getMessage(),
               'backtrace' => $backtrace->getFileContent(),
-          )));
+          ]);
 
       // Send email
-      $this->mailer->send($message);
+      $this->mailer->send($email);
     }
   }
 
   /**
    * This function builds a backtrace
    *
-   * @param GetResponseForExceptionEvent $event
+   * @param ExceptionEvent $event
    *
    * @return string
    */
-  private function buildBacktrace(GetResponseForExceptionEvent $event)
+  private function buildBacktrace(ExceptionEvent $event)
   {
     $user = $this->configuration->getUserInformation($this->tokenStorage->getToken());
 
@@ -235,15 +220,11 @@ class ExceptionHandler implements EventSubscriberInterface
    * This function handles the Kernel exception response. When the response contains an http 500 error, it is tried to
    * get the backtrace from the server (via the file name stored in the session) and mail this to the maintainers
    *
-   * @param FilterResponseEvent $responseObject
+   * @param ResponseEvent $responseObject
    *
-   * @throws \Twig_Error_Loader
-   * @throws \Twig_Error_Runtime
-   * @throws \Twig_Error_Syntax
-   * @author Wendo
-   *
+   * @throws TransportExceptionInterface
    */
-  public function onKernelResponse(FilterResponseEvent $responseObject)
+  public function onKernelResponse(ResponseEvent $responseObject)
   {
     $response   = $responseObject->getResponse();
     $request    = $responseObject->getRequest();
@@ -344,18 +325,14 @@ class ExceptionHandler implements EventSubscriberInterface
     }
 
     // Build attachments
-    $serverVariableAttachment  = new Swift_Attachment($serverVariablesString, "server variables.txt", 'text/plain');
-    $backtraceAttachment       = new Swift_Attachment($backtrace, "backtrace.txt", 'text/plain');
-    $requestAttachment         = new Swift_Attachment($requestString, "request.txt", 'text/plain');
-    $responseAttachment        = new Swift_Attachment($responseString[0], "response.txt", 'text/plain');
-    $globalVariablesAttachment = new Swift_Attachment($globalVariablesString, "global variables.txt", 'text/plain');
 
     // Create the error mail
-    $message = $this->mailer->createMessage()
-        ->setSubject("Exception Handler: 500 error at " . $requestUri)
-        ->setFrom($this->configuration->getSender())
-        ->setTo($this->configuration->getReceiver())
-        ->setBody($this->twig->render('@KickinExceptionHandler/Message/exception.txt.twig', array(
+    $email = (new TemplatedEmail())
+        ->subject(sprintf('Exception Handler: 500 error at %s', $requestUri))
+        ->from($this->configuration->getSender())
+        ->to($this->configuration->getReceiver())
+        ->textTemplate('@KickinExceptionHandler/Message/exception.txt.twig')
+        ->context([
             'user'          => $this->configuration->getUserInformation($this->tokenStorage->getToken()),
             'method'        => $method,
             'baseUrl'       => $baseUrl,
@@ -363,16 +340,15 @@ class ExceptionHandler implements EventSubscriberInterface
             'systemVersion' => $this->configuration->getSystemVersion(),
             'errorMessage'  => $session->get(self::SESSION_ERROR),
             'extra'         => isset($extension) ? $extension : '',
-        )))
-        ->attach($serverVariableAttachment)
-        ->attach($backtraceAttachment)
-        ->attach($requestAttachment)
-        ->attach($responseAttachment)
-        ->attach($globalVariablesAttachment);
+        ])
+        ->attach($serverVariablesString, "server variables.txt", 'text/plain')
+        ->attach($backtrace, "backtrace.txt", 'text/plain')
+        ->attach($requestString, "request.txt", 'text/plain')
+        ->attach($responseString[0], "response.txt", 'text/plain')
+        ->attach($globalVariablesString, "global variables.txt", 'text/plain');
 
     // Send email
-    $this->mailer->send($message);
-    $this->sendMessage();
+    $this->mailer->send($email);
 
     // Unset session
     $session->remove(self::SESSION_FILENAME);
@@ -469,28 +445,13 @@ class ExceptionHandler implements EventSubscriberInterface
 
     // Loop the array and get the information
     foreach ($array as $name => $value) {
-      if (is_array($value) || $value instanceof \Traversable) {
+      if (is_array($value) || $value instanceof Traversable) {
         $value = $this->arrayToString($value, $currentDepth + 1);
       }
       $return .= "\r\n" . str_repeat("\t", $currentDepth) . sprintf("%-{$max}s %s", $name . ':', $value);
     }
 
     return $return;
-  }
-
-  /**
-   * Flushes the Swift Mailer transport queue
-   */
-  private function sendMessage()
-  {
-    $transport = $this->mailer->getTransport();
-    if ($transport instanceof \Swift_Transport_SpoolTransport) {
-      $spool = $transport->getSpool();
-      if ($spool instanceof \Swift_FileSpool) {
-        $spool->recover();
-      }
-      $spool->flushQueue($this->mailerTransport);
-    }
   }
 
 }

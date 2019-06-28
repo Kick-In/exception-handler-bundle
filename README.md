@@ -14,45 +14,16 @@ In order for this bundle to work, you are required to follow the following steps
 php composer.phar require kick-in/exception-handler-bundle
 ```
 
-2. Enable the bundle in your `AppKernel.php`
+1. Enable the bundle in your `bundles.php` (if not done automatically)
 ```
 $bundles = [
 ....
-  new Kickin\ExceptionHandlerBundle\KickinExceptionHandlerBundle(),
+  Kickin\ExceptionHandlerBundle\KickinExceptionHandlerBundle::class => ['all' => true],
 ];
 ```
 
-3. Create the `exception_mailer` swiftmailer instance. For example:
-```yml
-swiftmailer:
-    default_mailer: default
-    mailers:
-      default:
-        transport: "%mailer_transport%"
-        host:      "%mailer_host%"
-        username:  "%mailer_user%"
-        password:  "%mailer_password%"
-        spool: { type: memory }
-      exception_mailer:
-        transport: "%mailer_transport%"
-        host:      "%mailer_host%"
-        username:  "%mailer_user%"
-        password:  "%mailer_password%"
-        spool: { type: memory }
-```
-
-4. Implement your custom configuration service. This should implement the `Configuration\ConfigurationInterface`. It will
+1. Implement your custom configuration service. This should implement the `Configuration\ConfigurationInterface`. It will
  then be autowired to the `ExceptionHandler` if you have set `container.autowiring.strict_mode` to false. Otherwise (default in Symfony >=4.0), alias the `Kickin\ExceptionHandlerBundle\Configuration\ConfigurationInterface` service to your custom configuration service. You can check an example implementation [here](Resources/doc/configuration-example.md).
-
-6. (Optional) If you don't use autowiring, or need manual configuration for your configuration service, configure your
-configuration service in the regular way. Include the new class in your own `services.yml`, and configure the service as you like:
-```yml
-services:
-    <your_class_here>:
-        arguments:
-          $cacheDir: '%kernel.cache_dir%'
-          <argument>: '@someservice'
-```
 
 That should be it, happy exception mailing!
 

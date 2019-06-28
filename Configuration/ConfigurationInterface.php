@@ -2,7 +2,8 @@
 
 namespace Kickin\ExceptionHandlerBundle\Configuration;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\NamedAddress;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 interface ConfigurationInterface
@@ -22,16 +23,16 @@ interface ConfigurationInterface
   public function getBacktraceFolder();
 
   /**
-   * SwiftMailer representation of the error sender
+   * Address representation of the error sender
    *
-   * @return string|array
+   * @return Address|string
    */
   public function getSender();
 
   /**
-   * SwiftMailer representation of the error receiver
+   * Address representation of the error receiver(s)
    *
-   * @return mixed
+   * @return Address|string
    */
   public function getReceiver();
 

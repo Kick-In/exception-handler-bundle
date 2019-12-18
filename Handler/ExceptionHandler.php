@@ -199,7 +199,7 @@ class ExceptionHandler implements EventSubscriberInterface
           ->setFrom($this->configuration->getSender())
           ->setTo($this->configuration->getReceiver())
           ->setBody($this->twig->render('@KickinExceptionHandler/Message/upload-failed.txt.twig', array(
-              'type'      => $uploadException ? get_class($uploadException) : null,
+              'type'      => $uploadException ? get_class($uploadException) : NULL,
               'exception' => $uploadException->getMessage(),
               'backtrace' => $backtrace->getFileContent(),
           )));
@@ -235,13 +235,13 @@ class ExceptionHandler implements EventSubscriberInterface
    * This function handles the Kernel exception response. When the response contains an http 500 error, it is tried to
    * get the backtrace from the server (via the file name stored in the session) and mail this to the maintainers
    *
-   * @author Wendo
-   *
    * @param FilterResponseEvent $responseObject
    *
    * @throws \Twig_Error_Loader
    * @throws \Twig_Error_Runtime
    * @throws \Twig_Error_Syntax
+   * @author Wendo
+   *
    */
   public function onKernelResponse(FilterResponseEvent $responseObject)
   {
@@ -276,14 +276,18 @@ class ExceptionHandler implements EventSubscriberInterface
     $baseUrl    = $request->getHost();
 
     // Remove any personal stuff from the request variables
-    $this->removeVar($request, 'request', 'password');
-    $this->removeVar($request, 'request', '_password');
-    $this->removeVar($request, 'server', 'PHP_AUTH_PW');
-    $this->removeVar($request, 'server', 'HTTP_COOKIE');
-    $this->removeVar($request, 'headers', 'php-auth-pw');
-    $this->removeVar($request, 'headers', 'cookie');
-    $this->removeVar($request, 'cookies', 'REMEMBERME');
-    $this->removeVar($request, 'cookies', 'PHPSESSID');
+    $this->removeVars($request, 'request', [
+        'password', '_password',
+    ]);
+    $this->removeVars($request, 'server', [
+        'COOKIE', 'HTTP_AUTHORIZATION', 'HTTP_COOKIE', 'PHP_AUTH_PW',
+    ]);
+    $this->removeVars($request, 'headers', [
+        'authorization', 'cookie', 'php-auth-pw',
+    ]);
+    $this->removeVars($request, 'cookies', [
+        'PHPSESSID', 'REMEMBERME',
+    ]);
 
     // Get the POST variables
     $responseString   = $response->__toString();
@@ -397,6 +401,24 @@ class ExceptionHandler implements EventSubscriberInterface
   {
     if ($request->$parameterBin->has($variable)) {
       $request->$parameterBin->set($variable, '**REMOVED**');
+    }
+  }
+
+  /**
+   * Removes a variables from the request
+   *
+   * @param Request $request
+   * @param string  $parameterBin
+   * @param array   $variables
+   */
+  private function removeVars(Request &$request, $parameterBin, array $variables)
+  {
+    foreach ($variables as $variable) {
+      $this->removeVar($request, $parameterBin, $variable);
+
+      if ($parameterBin === 'server'){
+        $this->removeVar($request, $parameterBin, 'REDIRECT_' . $variable);
+      }
     }
   }
 

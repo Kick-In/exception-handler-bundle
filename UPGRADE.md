@@ -1,5 +1,8 @@
 # Upgrade notes
 
+# 2.1
+In the 2.1 release support for Twig versions smaller than 2.7 was removed in order to add support for Twig 3
+
 # 2.0
 
 The 2.0 release marks the usage of autowiring for the configuration class. If you set the `container.autowiring.strict_mode` parameter to true (default for Symfony >=4.0), you need to alias the `Kickin\ExceptionHandlerBundle\Configuration\ConfigurationInterface` class to your configuration class. You can remove the `kickin.exceptionhandler.configuration.class` parameter from your configuration.

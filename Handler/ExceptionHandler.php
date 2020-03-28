@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Twig_Environment;
+use Twig\Environment;
 
 /**
  * Description of ExceptionHandler
@@ -67,7 +67,7 @@ class ExceptionHandler implements EventSubscriberInterface
   private $tokenStorage;
 
   /**
-   * @var Twig_Environment
+   * @var Environment
    */
   private $twig;
 
@@ -82,11 +82,11 @@ class ExceptionHandler implements EventSubscriberInterface
    * @param Swift_Mailer           $mailer
    * @param Swift_Transport        $transport
    * @param TokenStorageInterface  $tokenStorage
-   * @param Twig_Environment       $twig
+   * @param Environment            $twig
    * @param ConfigurationInterface $configuration
    */
   public function __construct(Swift_Mailer $mailer, Swift_Transport $transport, TokenStorageInterface $tokenStorage,
-                              Twig_Environment $twig, ConfigurationInterface $configuration)
+                              Environment $twig, ConfigurationInterface $configuration)
   {
     $this->mailer          = $mailer;
     $this->mailerTransport = $transport;

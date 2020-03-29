@@ -2,7 +2,9 @@
 
 namespace Kickin\ExceptionHandlerBundle\Exceptions;
 
-class UploadFailedException extends \Exception
+use Exception;
+
+class UploadFailedException extends Exception
 {
 
 }

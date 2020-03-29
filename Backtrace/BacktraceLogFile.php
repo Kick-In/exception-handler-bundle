@@ -2,6 +2,7 @@
 
 namespace Kickin\ExceptionHandlerBundle\Backtrace;
 
+use Exception;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -39,6 +40,8 @@ class BacktraceLogFile
    * Constructor -> generate an unique name
    *
    * @param string $folder
+   *
+   * @throws Exception
    */
   public function __construct($folder)
   {
@@ -58,6 +61,8 @@ class BacktraceLogFile
 
   /**
    * Generates a new, unique name
+   *
+   * @throws Exception
    */
   public function generateNewName()
   {

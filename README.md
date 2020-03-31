@@ -1,5 +1,6 @@
 # ExceptionHandlerBundle
-This bundles integrates an simple Exception Handler in your Symfony Application, which is capable of mailing the exact problem.
+This bundles integrates an simple Exception Handler in your Symfony Application, 
+which is capable of mailing the exact problem.
 
 ## Upgrading
 
@@ -14,44 +15,45 @@ In order for this bundle to work, you are required to follow the following steps
 php composer.phar require kick-in/exception-handler-bundle
 ```
 
-2. Enable the bundle in your `AppKernel.php`
-```
+1. Enable the bundle in your `bundles.php` (if not done automatically)
+```php
 $bundles = [
-....
-  new Kickin\ExceptionHandlerBundle\KickinExceptionHandlerBundle(),
+  Kickin\ExceptionHandlerBundle\KickinExceptionHandlerBundle::class => ['all' => true],
 ];
 ```
 
-3. Create the `exception_mailer` swiftmailer instance. For example:
-```yml
+1. Choose the mail backend in the configuration. For example, for SwiftMailer:
+```yaml
+kickin_exception_handler:
+    mail_backend: 'swift' # One of "swift"; "swift_mailer"; "symfony"; "symfony_mailer"
+```
+
+1. Implement your custom configuration service. This should implement either 
+   [`Configuration\SwiftMailerConfigurationInterface`](https://github.com/Kick-In/exception-handler-bundle/blob/master/Configuration/SwiftMailerConfigurationInterface.php)
+   or  
+   [`Configuration\SymfonyMailerConfigurationInterface`](https://github.com/Kick-In/exception-handler-bundle/blob/master/Configuration/SymfonyMailerConfigurationInterface.php)
+   , depending on you mail backend choice.
+   
+   You can check a custom example implementation [here](Resources/doc/configuration-example.md).
+    
+1. Your configuration will be autowired to the correct ExceptionHandler if you have set `container.autowiring.strict_mode` to false.
+   Otherwise, (default in Symfony >=4.0), alias the `Kickin\ExceptionHandlerBundle\Configuration\(Swift|Symfony)MailerConfigurationInterface` service to your custom configuration class.
+   For example:
+```yaml
+ Kickin\ExceptionHandlerBundle\Configuration\SymfonyMailerConfigurationInterface:
+   alias: 'App\ExceptionHandler\ExceptionHandlerConfiguration'
+```
+
+1. [SwiftMailer only] Create the `exception_mailer` SwiftMailer instance. For example:
+```yaml
 swiftmailer:
     default_mailer: default
     mailers:
       default:
         transport: "%mailer_transport%"
-        host:      "%mailer_host%"
-        username:  "%mailer_user%"
-        password:  "%mailer_password%"
-        spool: { type: memory }
       exception_mailer:
         transport: "%mailer_transport%"
-        host:      "%mailer_host%"
-        username:  "%mailer_user%"
-        password:  "%mailer_password%"
         spool: { type: memory }
-```
-
-4. Implement your custom configuration service. This should implement the `Configuration\ConfigurationInterface`. It will
- then be autowired to the `ExceptionHandler` if you have set `container.autowiring.strict_mode` to false. Otherwise (default in Symfony >=4.0), alias the `Kickin\ExceptionHandlerBundle\Configuration\ConfigurationInterface` service to your custom configuration service. You can check an example implementation [here](Resources/doc/configuration-example.md).
-
-6. (Optional) If you don't use autowiring, or need manual configuration for your configuration service, configure your
-configuration service in the regular way. Include the new class in your own `services.yml`, and configure the service as you like:
-```yml
-services:
-    <your_class_here>:
-        arguments:
-          $cacheDir: '%kernel.cache_dir%'
-          <argument>: '@someservice'
 ```
 
 That should be it, happy exception mailing!
@@ -60,7 +62,6 @@ That should be it, happy exception mailing!
 
 The original functionality has been created by WendoB, while BobV splitted the codebase into a separate bundle making
 it configurable for more users.
-
 
 ## Problems
 

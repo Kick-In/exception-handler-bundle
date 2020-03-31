@@ -17,11 +17,27 @@ class Configuration implements ConfigurationInterface
    */
   public function getConfigTreeBuilder()
   {
-    $treeBuilder = new TreeBuilder();
-    $treeBuilder->root('kickin_exception_handler');
+    $treeBuilder = new TreeBuilder('kickin_exception_handler');
+
+    if (method_exists($treeBuilder, 'getRootNode')) {
+      $rootNode = $treeBuilder->getRootNode();
+    } else {
+      // for symfony/config 4.1 and older
+      $rootNode = $treeBuilder->root('kickin_exception_handler');
+    }
+
     // Here you should define the parameters that are allowed to
     // configure your bundle. See the documentation linked above for
     // more information on that topic.
+
+    $rootNode
+        ->children()
+          ->enumNode('mail_backend')
+            ->values(['swift', 'swift_mailer', 'symfony', 'symfony_mailer'])
+            ->defaultValue('swift')
+          ->end() // mailer_style
+        ->end(); // root children
+
     return $treeBuilder;
   }
 }

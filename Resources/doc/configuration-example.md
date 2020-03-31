@@ -5,7 +5,7 @@ namespace Kickin\ExceptionHandlerBundle\Configuration;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
-class ExampleConfiguration implements ConfigurationInterface
+class ExampleConfiguration implements SwiftMailerConfigurationInterface
 {
   /**
    * @var string
@@ -13,7 +13,7 @@ class ExampleConfiguration implements ConfigurationInterface
   private $cacheDir;
 
   /**
-   * EmptyConfiguration constructor.
+   * ExampleConfiguration constructor.
    *
    * @param string $cacheDir
    */
@@ -25,7 +25,7 @@ class ExampleConfiguration implements ConfigurationInterface
   /**
    * @inheritdoc
    */
-  public function isProductionEnvironment()
+  public function isProductionEnvironment(): bool
   {
     return false;
   }
@@ -33,15 +33,13 @@ class ExampleConfiguration implements ConfigurationInterface
   /**
    * @inheritdoc
    */
-  public function getBacktraceFolder()
+  public function getBacktraceFolder(): bool
   {
     return $this->cacheDir . '/exception-handler';
   }
 
   /**
-   * SwiftMailer representation of the error sender
-   *
-   * @return string|array
+   * @inheritdoc
    */
   public function getSender()
   {
@@ -49,9 +47,7 @@ class ExampleConfiguration implements ConfigurationInterface
   }
 
   /**
-   * SwiftMailer representation of the error receiver
-   *
-   * @return mixed
+   * @inheritdoc
    */
   public function getReceiver()
   {
@@ -59,13 +55,9 @@ class ExampleConfiguration implements ConfigurationInterface
   }
 
   /**
-   * Retrieve user information from the token, and return it in a single string
-   *
-   * @param TokenInterface|null $token
-   *
-   * @return string
+   * @inheritdoc
    */
-  public function getUserInformation(TokenInterface $token = null)
+  public function getUserInformation(TokenInterface $token = null): string
   {
     if ($token !== NULL) {
       return $token->getUsername();
@@ -75,11 +67,9 @@ class ExampleConfiguration implements ConfigurationInterface
   }
 
   /**
-   * Retrieve the system version
-   *
-   * @return mixed
+   * @inheritdoc
    */
-  public function getSystemVersion()
+  public function getSystemVersion(): string
   {
     return 'git-hash';
   }

@@ -16,16 +16,23 @@
     }
   ],
   "require": {
-    "php": ">=7.0",
-    "symfony/filesystem": "~3.0|~4.0",
-    "symfony/dependency-injection": "~3.0|~4.0",
-    "symfony/security": "~3.0|~4.0",
-    "symfony/config": "~3.0|~4.0",
-    "symfony/event-dispatcher": "~3.0|~4.0",
-    "symfony/http-foundation": "~3.0|~4.0",
-    "symfony/http-kernel": "~3.0|~4.0",
-    "symfony/twig-bundle": "~3.0|~4.0",
+    "php": ">=7.3",
+    "symfony/filesystem": "~4.4|~5.0",
+    "symfony/dependency-injection": "~4.4|~5.0",
+    "symfony/security": "~4.4|~5.0",
+    "symfony/config": "~4.4|~5.0",
+    "symfony/event-dispatcher": "~4.4|~5.0",
+    "symfony/http-foundation": "~4.4|~5.0",
+    "symfony/http-kernel": "~4.4|~5.0",
+    "symfony/twig-bundle": "~4.4|~5.0"
+  },
+  "require-dev": {
+    "symfony/mailer": "~4.4|~5.0",
     "symfony/swiftmailer-bundle": ">=2.6.0"
+  },
+  "suggest": {
+    "symfony/mailer": "When you want to use the Symfony Mailer, install this bundle",
+    "symfony/swiftmailer-bundle": "When you want to use Swiftmailer, install this bundle"
   },
   "conflict": {
     "twig/twig": "<2.7.0"

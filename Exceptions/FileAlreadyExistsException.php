@@ -2,7 +2,9 @@
 
 namespace Kickin\ExceptionHandlerBundle\Exceptions;
 
-class FileAlreadyExistsException extends \Exception
+use Exception;
+
+class FileAlreadyExistsException extends Exception
 {
 
 }

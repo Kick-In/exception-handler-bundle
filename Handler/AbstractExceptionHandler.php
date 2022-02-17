@@ -208,7 +208,7 @@ abstract class AbstractExceptionHandler
 
     if (!$this->configuration->isProductionEnvironment()) {
       // no production! -> don't sent an email
-      if (!$session->has(self::SESSION_FILENAME)) return;
+      if (!$session || !$session->has(self::SESSION_FILENAME)) return;
 
       try {
         $fs = new Filesystem();
@@ -250,7 +250,7 @@ abstract class AbstractExceptionHandler
     $requestString    = $this->getRequestString($request);
     $responseContent  = $response->getContent();
     $responseString   = explode($responseContent, $responseString);
-    $sessionVariables = $session->all();
+    $sessionVariables = $session ? $session->all() : [];
     $cookieVariables  = $request->cookies->all();
 
     // Remove the security token out of the session
@@ -264,30 +264,36 @@ abstract class AbstractExceptionHandler
     $serverVariablesString = "Server variables: ";
     $serverVariablesString .= "\n" . print_r($request->server, true);
 
-    // Get backtrace out of session.
-    $hash = $this->generateHash($requestUri, $session->get(self::SESSION_ERROR));
-    $now  = new DateTime();
-    if ($session->get(self::SESSION_PREVIOUS_TIME) !== NULL && $session->get(self::SESSION_PREVIOUS_HASH) == $hash) {
-      $previousDatetime = DateTime::createFromFormat('Y-m-d H:i', $session->get(self::SESSION_PREVIOUS_TIME));
-      $previousDatetime->modify('+10 minutes');
-    } else {
-      $previousDatetime = NULL;
-    }
+    if ($session) {
+      // Get backtrace out of session.
+      $hash = $this->generateHash($requestUri, $session->get(self::SESSION_ERROR));
+      $now  = new DateTime();
+      if ($session->get(self::SESSION_PREVIOUS_TIME) !== NULL && $session->get(self::SESSION_PREVIOUS_HASH) == $hash) {
+        $previousDatetime = DateTime::createFromFormat('Y-m-d H:i', $session->get(self::SESSION_PREVIOUS_TIME));
+        $previousDatetime->modify('+10 minutes');
+      } else {
+        $previousDatetime = NULL;
+      }
 
-    // Check if error is repeated
-    if (!$session->has(self::SESSION_FILENAME) ||
-        ($session->get(self::SESSION_PREVIOUS_HASH, '') == $hash && $previousDatetime !== NULL && $previousDatetime > $now)
-    ) {
-      return;
-    }
+      // Check if error is repeated
+      if (!$session->has(self::SESSION_FILENAME) ||
+          ($session->get(self::SESSION_PREVIOUS_HASH, '') == $hash && $previousDatetime !== NULL && $previousDatetime > $now)
+      ) {
+        return;
+      }
 
-    $session->set(self::SESSION_PREVIOUS_HASH, $hash);
-    $session->set(self::SESSION_PREVIOUS_TIME, $now->format('Y-m-d H:i'));
+      $session->set(self::SESSION_PREVIOUS_HASH, $hash);
+      $session->set(self::SESSION_PREVIOUS_TIME, $now->format('Y-m-d H:i'));
+    }
 
     // Retrieve backtrace contents
     $fs            = new Filesystem();
-    $backtraceFile = $session->get(self::SESSION_FILENAME);
-    $backtrace     = file_get_contents($backtraceFile);
+    if ($session) {
+      $backtraceFile = $session->get(self::SESSION_FILENAME);
+      $backtrace     = file_get_contents($backtraceFile);
+    } else {
+      $backtrace = null;
+    }
     if (!$backtrace) {
       $backtrace = "FILE NOT FOUND. THE BACKTRACE FILE COULDN'T BE FOUND ON THE SERVER. TOO BAD... MAYBE HAVE A LOOK?\n\n File: $backtraceFile";
     }
@@ -301,11 +307,13 @@ abstract class AbstractExceptionHandler
 
     $this->sendExceptionMessage(
         $session, $requestUri, $baseUrl, $method, $requestString, $responseString,
-        $backtrace, $serverVariablesString, $globalVariablesString, isset($extension) ? $extension : '');
+        $backtrace, $serverVariablesString, $globalVariablesString, $extension ?? '');
 
     // Unset session
-    $session->remove(self::SESSION_FILENAME);
-    $session->remove(self::SESSION_ERROR);
+    if ($session) {
+      $session->remove(self::SESSION_FILENAME);
+      $session->remove(self::SESSION_ERROR);
+    }
   }
 
   /**
@@ -416,21 +424,21 @@ abstract class AbstractExceptionHandler
   abstract protected function sendExceptionHandledFailedMessage($uploadException, BacktraceLogFile $backtrace): void;
 
   /**
-   * @param SessionInterface $session
-   * @param string           $requestUri
-   * @param string           $baseUrl
-   * @param string           $method
-   * @param string           $requestString
-   * @param array            $responseString
-   * @param string           $backtrace
-   * @param string           $serverVariablesString
-   * @param string           $globalVariablesString
-   * @param string           $extension
+   * @param SessionInterface|null $session
+   * @param string                $requestUri
+   * @param string                $baseUrl
+   * @param string                $method
+   * @param string                $requestString
+   * @param array                 $responseString
+   * @param string                $backtrace
+   * @param string                $serverVariablesString
+   * @param string                $globalVariablesString
+   * @param string                $extension
    *
    * @throws Exception
    */
   abstract protected function sendExceptionMessage(
-      SessionInterface $session, string $requestUri, string $baseUrl, string $method,
+      ?SessionInterface $session, string $requestUri, string $baseUrl, string $method,
       string $requestString, array $responseString, string $backtrace,
       string $serverVariablesString, string $globalVariablesString, string $extension): void;
 }

@@ -91,23 +91,23 @@ class SwiftMailerExceptionHandler extends AbstractExceptionHandler implements Ev
   }
 
   /**
-   * @param SessionInterface $session
-   * @param string           $requestUri
-   * @param string           $baseUrl
-   * @param string           $method
-   * @param string           $requestString
-   * @param array            $responseString
-   * @param string           $backtrace
-   * @param string           $serverVariablesString
-   * @param string           $globalVariablesString
-   * @param string           $extension
+   * @param SessionInterface|null $session
+   * @param string                $requestUri
+   * @param string                $baseUrl
+   * @param string                $method
+   * @param string                $requestString
+   * @param array                 $responseString
+   * @param string                $backtrace
+   * @param string                $serverVariablesString
+   * @param string                $globalVariablesString
+   * @param string                $extension
    *
    * @throws LoaderError
    * @throws RuntimeError
    * @throws SyntaxError
    */
   protected function sendExceptionMessage(
-      SessionInterface $session, string $requestUri, string $baseUrl, string $method,
+      ?SessionInterface $session, string $requestUri, string $baseUrl, string $method,
       string $requestString, array $responseString, string $backtrace,
       string $serverVariablesString, string $globalVariablesString, string $extension): void
   {
@@ -129,7 +129,7 @@ class SwiftMailerExceptionHandler extends AbstractExceptionHandler implements Ev
             'baseUrl'       => $baseUrl,
             'requestUri'    => $requestUri,
             'systemVersion' => $this->configuration->getSystemVersion(),
-            'errorMessage'  => $session->get(self::SESSION_ERROR),
+            'errorMessage'  => $session ? $session->get(self::SESSION_ERROR) : '',
             'extra'         => $extension,
         )))
         ->attach($serverVariableAttachment)

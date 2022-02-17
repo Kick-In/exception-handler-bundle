@@ -71,7 +71,7 @@ class SymfonyMailerExceptionHandler extends AbstractExceptionHandler implements 
    * @throws TransportExceptionInterface
    */
   protected function sendExceptionMessage(
-      SessionInterface $session, string $requestUri, string $baseUrl, string $method,
+      ?SessionInterface $session, string $requestUri, string $baseUrl, string $method,
       string $requestString, array $responseString, string $backtrace,
       string $serverVariablesString, string $globalVariablesString, string $extension): void
   {
@@ -87,8 +87,8 @@ class SymfonyMailerExceptionHandler extends AbstractExceptionHandler implements 
             'baseUrl'       => $baseUrl,
             'requestUri'    => $requestUri,
             'systemVersion' => $this->configuration->getSystemVersion(),
-            'errorMessage'  => $session->get(self::SESSION_ERROR),
-            'extra'         => isset($extension) ? $extension : '',
+            'errorMessage'  => $session ? $session->get(self::SESSION_ERROR) : '',
+            'extra'         => $extension ?? '',
         ])
         ->attach($serverVariablesString, "server variables.txt", 'text/plain')
         ->attach($backtrace, "backtrace.txt", 'text/plain')

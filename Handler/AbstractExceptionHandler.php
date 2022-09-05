@@ -113,7 +113,8 @@ abstract class AbstractExceptionHandler
     $backtrace->setFileContent($this->buildBacktrace($event));
 
     // Unset the used session variable
-    $session = $event->getRequest()->getSession();
+    $request = $event->getRequest();
+    $session = $request->hasSession() ? $request->getSession() : null;
     if ($session) {
       $session->remove(self::SESSION_FILENAME);
       $session->set(self::SESSION_ERROR, $exception->getMessage());
@@ -204,7 +205,7 @@ abstract class AbstractExceptionHandler
     $response   = $responseObject->getResponse();
     $request    = $responseObject->getRequest();
     $statusCode = $response->getStatusCode();
-    $session    = $request->getSession();
+    $session    = $request->hasSession() ? $request->getSession() : null;
 
     if (!$this->configuration->isProductionEnvironment()) {
       // no production! -> don't sent an email

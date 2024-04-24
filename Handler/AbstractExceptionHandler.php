@@ -242,9 +242,10 @@ abstract class AbstractExceptionHandler
     $this->removeVars($request, 'headers', [
         'authorization', 'cookie', 'php-auth-pw',
     ]);
-    $this->removeVars($request, 'cookies', [
-        'PHPSESSID', 'REMEMBERME',
-    ]);
+    $this->removeVars($request, 'cookies', array_merge(
+        ['PHPSESSID', 'REMEMBERME'],
+        $this->configuration->filterCookieNames(),
+    ));
 
     // Get the POST variables
     $responseString   = $response->__toString();

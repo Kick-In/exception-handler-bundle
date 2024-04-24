@@ -1,5 +1,8 @@
 # Upgrade notes
 
+# 3.1
+Add support for custom cookie name filtering. You will need to adjust your configuration files so they implement the `filterCookieNames` method. Return an empty array to keep the current behaviour.
+
 # 3.0
 The 3.0 adds support for the Symfony mailer component, but applications using SwiftMailer are still supported.
 

@@ -35,6 +35,14 @@ interface ConfigurationInterface
   public function getUserInformation(TokenInterface $token = NULL): string;
 
   /**
+   * Filters the cookie names returned by this function.
+   * PHPSESSID & REMEMBERME are filtered by default.
+   *
+   * @return string[]
+   */
+  public function filterCookieNames(): array;
+
+  /**
    * Retrieve the system version
    *
    * @return string

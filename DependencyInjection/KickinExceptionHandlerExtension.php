@@ -11,18 +11,9 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-/**
- * This is the class that loads and manages your bundle configuration
- *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
- */
 class KickinExceptionHandlerExtension extends Extension
 {
-  /**
-   * {@inheritDoc}
-   * @throws Exception
-   */
-  public function load(array $configs, ContainerBuilder $container)
+  public function load(array $configs, ContainerBuilder $container): void
   {
     // Parse configuration
     $configuration = new Configuration();
@@ -38,10 +29,8 @@ class KickinExceptionHandlerExtension extends Extension
 
   /**
    * Configures the Swift Mailer handler
-   *
-   * @param ContainerBuilder $container
    */
-  private function configureSwiftMailer(ContainerBuilder $container)
+  private function configureSwiftMailer(ContainerBuilder $container): void
   {
     if (!class_exists('Swift_Mailer')) {
       throw new InvalidConfigurationException('You selected SwiftMailer as mail backend, but it is not installed. Try running `composer req symfony/swiftmailer-bundle` or switch to the Symfony mailer in the configuration.');
@@ -57,10 +46,8 @@ class KickinExceptionHandlerExtension extends Extension
 
   /**
    * Configures the Symfony Mailer handler
-   *
-   * @param ContainerBuilder $container
    */
-  private function configureSymfonyMailer(ContainerBuilder $container)
+  private function configureSymfonyMailer(ContainerBuilder $container): void
   {
     if (!class_exists('Symfony\Component\Mailer\Mailer')) {
       throw new InvalidConfigurationException('You selected the Symfony mailer as mail backend, but it is not installed. Try running `composer req symfony/mailer` or switch to SwiftMailer in the configuration.');
@@ -71,11 +58,6 @@ class KickinExceptionHandlerExtension extends Extension
 
   /**
    * Configure the shared defaults for both handlers
-   *
-   * @param ContainerBuilder $container
-   * @param string           $handlerClass
-   *
-   * @return Definition
    */
   private function configureMailer(ContainerBuilder $container, string $handlerClass): Definition
   {

@@ -20,11 +20,12 @@ use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Throwable;
 use Traversable;
 
 /**
  * This Service triggers on the kernel.exception and catches any HTTP 500 error. When an HTTP 500 error is detected,
- * an e-mail is send to maintainers.
+ * an e-mail is sent to maintainers.
  *
  * Pick one of the available implementations, based on your mailer configuration.
  *
@@ -77,24 +78,22 @@ abstract class AbstractExceptionHandler
    * while the KernelResponse event is used to determine if the 500 error message is actually displayed to the user.
    * This ensures that NotAuthorizedExceptions are not mailed as a 500 error (as a 403 error is presented).
    */
-  static protected function getSubscribedEvents()
+  static protected function getSubscribedEvents(): array
   {
-    return array(
-        KernelEvents::EXCEPTION => array(array('onKernelException', 0)),
-        KernelEvents::RESPONSE  => array(array('onKernelResponse', 0)),
-    );
+    return [
+        KernelEvents::EXCEPTION => [['onKernelException', 0]],
+        KernelEvents::RESPONSE  => [['onKernelResponse', 0]],
+    ];
   }
 
   /**
-   * This function will create create the backtrace and save it with an random
+   * This function will create the backtrace and save it with a random
    * name in /web/uploads/exceptionBacktrace/ and save the name in the session so
    * in the html status exception handler load the backtrace and send it in an email.
    *
-   * @param ExceptionEvent $event
-   *
    * @throws Exception
    */
-  public function onKernelException(ExceptionEvent $event)
+  public function onKernelException(ExceptionEvent $event): void
   {
     // Skip some exception types directly
     $exception = $event->getThrowable();
@@ -172,12 +171,8 @@ abstract class AbstractExceptionHandler
 
   /**
    * This function builds a backtrace
-   *
-   * @param ExceptionEvent $event
-   *
-   * @return string
    */
-  protected function buildBacktrace(ExceptionEvent $event)
+  protected function buildBacktrace(ExceptionEvent $event): string
   {
     $user = $this->configuration->getUserInformation($this->tokenStorage->getToken());
 
@@ -196,11 +191,9 @@ abstract class AbstractExceptionHandler
    * This function handles the Kernel exception response. When the response contains an http 500 error, it is tried to
    * get the backtrace from the server (via the file name stored in the session) and mail this to the maintainers
    *
-   * @param ResponseEvent $responseObject
-   *
    * @throws Exception
    */
-  public function onKernelResponse(ResponseEvent $responseObject)
+  public function onKernelResponse(ResponseEvent $responseObject): void
   {
     $response   = $responseObject->getResponse();
     $request    = $responseObject->getRequest();
@@ -318,25 +311,15 @@ abstract class AbstractExceptionHandler
     }
   }
 
-  /**
-   * @param $url
-   * @param $exceptionMessage
-   *
-   * @return string
-   */
-  protected function generateHash($url, $exceptionMessage)
+  protected function generateHash(string $url, string $exceptionMessage): string
   {
     return md5($url . $exceptionMessage);
   }
 
   /**
    * Removes a variable from the request
-   *
-   * @param Request $request
-   * @param string  $parameterBin
-   * @param string  $variable
    */
-  protected function removeVar(Request $request, $parameterBin, $variable)
+  protected function removeVar(Request $request, string $parameterBin, string $variable): void
   {
     if ($request->$parameterBin->has($variable)) {
       $request->$parameterBin->set($variable, '**REMOVED**');
@@ -345,12 +328,8 @@ abstract class AbstractExceptionHandler
 
   /**
    * Removes a variables from the request
-   *
-   * @param Request $request
-   * @param string  $parameterBin
-   * @param array   $variables
    */
-  protected function removeVars(Request $request, $parameterBin, array $variables)
+  protected function removeVars(Request $request, string $parameterBin, array $variables): void
   {
     foreach ($variables as $variable) {
       $this->removeVar($request, $parameterBin, $variable);
@@ -363,12 +342,8 @@ abstract class AbstractExceptionHandler
 
   /**
    * Returns the request as a string.
-   *
-   * @param Request $request
-   *
-   * @return string The request
    */
-  protected function getRequestString(Request $request)
+  protected function getRequestString(Request $request): string
   {
     $string =
         sprintf('%s %s %s', $request->getMethod(), $request->getRequestUri(), $request->server->get('SERVER_PROTOCOL')) . "\r\n\r\nRequest headers:\r\n" .
@@ -389,14 +364,8 @@ abstract class AbstractExceptionHandler
 
   /**
    * Convert an array to string
-   *
-   * @param     $array
-   * @param int $currentDepth
-   * @param int $maxDepth
-   *
-   * @return string
    */
-  protected function arrayToString($array, $currentDepth = 0, $maxDepth = 3)
+  protected function arrayToString(array $array, int $currentDepth = 0, int $maxDepth = 3): string
   {
     if ($currentDepth >= $maxDepth) {
       return '**Maximum recursion level reached**';
@@ -418,25 +387,11 @@ abstract class AbstractExceptionHandler
   }
 
   /**
-   * @param                  $uploadException
-   * @param BacktraceLogFile $backtrace
-   *
    * @throws Exception
    */
-  abstract protected function sendExceptionHandledFailedMessage($uploadException, BacktraceLogFile $backtrace): void;
+  abstract protected function sendExceptionHandledFailedMessage(Throwable $uploadException, BacktraceLogFile $backtrace): void;
 
   /**
-   * @param SessionInterface|null $session
-   * @param string                $requestUri
-   * @param string                $baseUrl
-   * @param string                $method
-   * @param string                $requestString
-   * @param array                 $responseString
-   * @param string                $backtrace
-   * @param string                $serverVariablesString
-   * @param string                $globalVariablesString
-   * @param string                $extension
-   *
    * @throws Exception
    */
   abstract protected function sendExceptionMessage(

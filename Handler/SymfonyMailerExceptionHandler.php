@@ -10,10 +10,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Throwable;
 
-/**
- * Class MailerExceptionHandler
- */
 class SymfonyMailerExceptionHandler extends AbstractExceptionHandler implements EventSubscriberInterface
 {
   /**
@@ -21,13 +19,6 @@ class SymfonyMailerExceptionHandler extends AbstractExceptionHandler implements 
    */
   private $mailer;
 
-  /**
-   * Constructor
-   *
-   * @param MailerInterface                     $mailer
-   * @param TokenStorageInterface               $tokenStorage
-   * @param SymfonyMailerConfigurationInterface $configuration
-   */
   public function __construct(
       MailerInterface $mailer, TokenStorageInterface $tokenStorage, SymfonyMailerConfigurationInterface $configuration)
   {
@@ -36,19 +27,15 @@ class SymfonyMailerExceptionHandler extends AbstractExceptionHandler implements 
     $this->mailer = $mailer;
   }
 
-  /**
-   * @inheritdoc
-   */
-  static public function getSubscribedEvents()
+  static public function getSubscribedEvents(): array
   {
     return parent::getSubscribedEvents();
   }
 
   /**
-   * @inheritDoc
    * @throws TransportExceptionInterface
    */
-  protected function sendExceptionHandledFailedMessage($uploadException, BacktraceLogFile $backtrace): void
+  protected function sendExceptionHandledFailedMessage(Throwable $uploadException, BacktraceLogFile $backtrace): void
   {
     // Build email
     $email = (new TemplatedEmail())
@@ -67,7 +54,6 @@ class SymfonyMailerExceptionHandler extends AbstractExceptionHandler implements 
   }
 
   /**
-   * @inheritDoc
    * @throws TransportExceptionInterface
    */
   protected function sendExceptionMessage(

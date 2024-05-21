@@ -5,8 +5,6 @@ namespace Kickin\ExceptionHandlerBundle\Configuration;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
- * Interface ConfigurationInterface
- *
  * @internal
  */
 interface ConfigurationInterface

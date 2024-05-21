@@ -12,14 +12,12 @@ use Swift_Transport_SpoolTransport;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Throwable;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-/**
- * Class SwiftMailerExceptionHandler
- */
 class SwiftMailerExceptionHandler extends AbstractExceptionHandler implements EventSubscriberInterface
 {
   /**
@@ -57,51 +55,34 @@ class SwiftMailerExceptionHandler extends AbstractExceptionHandler implements Ev
     $this->twig            = $twig;
   }
 
-  /**
-   * @inheritdoc
-   */
-  static public function getSubscribedEvents()
+  static public function getSubscribedEvents(): array
   {
     return parent::getSubscribedEvents();
   }
 
   /**
-   * @param                  $uploadException
-   * @param BacktraceLogFile $backtrace
-   *
    * @throws LoaderError
    * @throws RuntimeError
    * @throws SyntaxError
    */
-  protected function sendExceptionHandledFailedMessage($uploadException, BacktraceLogFile $backtrace): void
+  protected function sendExceptionHandledFailedMessage(Throwable $uploadException, BacktraceLogFile $backtrace): void
   {
     // Build email
     $message = $this->mailer->createMessage()
         ->setSubject("Exception Handler: Failed to upload backtrace")
         ->setFrom($this->configuration->getSender())
         ->setTo($this->configuration->getReceiver())
-        ->setBody($this->twig->render('@KickinExceptionHandler/Message/upload-failed.txt.twig', array(
+        ->setBody($this->twig->render('@KickinExceptionHandler/Message/upload-failed.txt.twig', [
             'type'      => $uploadException ? get_class($uploadException) : NULL,
             'exception' => $uploadException->getMessage(),
             'backtrace' => $backtrace->getFileContent(),
-        )));
+        ]));
 
     // Send email
     $this->mailer->send($message);
   }
 
   /**
-   * @param SessionInterface|null $session
-   * @param string                $requestUri
-   * @param string                $baseUrl
-   * @param string                $method
-   * @param string                $requestString
-   * @param array                 $responseString
-   * @param string                $backtrace
-   * @param string                $serverVariablesString
-   * @param string                $globalVariablesString
-   * @param string                $extension
-   *
    * @throws LoaderError
    * @throws RuntimeError
    * @throws SyntaxError
@@ -123,7 +104,7 @@ class SwiftMailerExceptionHandler extends AbstractExceptionHandler implements Ev
         ->setSubject("Exception Handler: 500 error at " . $requestUri)
         ->setFrom($this->configuration->getSender())
         ->setTo($this->configuration->getReceiver())
-        ->setBody($this->twig->render('@KickinExceptionHandler/Message/exception.txt.twig', array(
+        ->setBody($this->twig->render('@KickinExceptionHandler/Message/exception.txt.twig', [
             'user'          => $this->configuration->getUserInformation($this->tokenStorage->getToken()),
             'method'        => $method,
             'baseUrl'       => $baseUrl,
@@ -131,7 +112,7 @@ class SwiftMailerExceptionHandler extends AbstractExceptionHandler implements Ev
             'systemVersion' => $this->configuration->getSystemVersion(),
             'errorMessage'  => $session ? $session->get(self::SESSION_ERROR) : '',
             'extra'         => $extension,
-        )))
+        ]))
         ->attach($serverVariableAttachment)
         ->attach($backtraceAttachment)
         ->attach($requestAttachment)

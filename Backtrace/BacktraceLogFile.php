@@ -37,13 +37,9 @@ class BacktraceLogFile
   private $folder;
 
   /**
-   * Constructor -> generate an unique name
-   *
-   * @param string $folder
-   *
    * @throws Exception
    */
-  public function __construct($folder)
+  public function __construct(string $folder)
   {
     $this->folder = $folder;
     $this->generateNewName();
@@ -51,10 +47,8 @@ class BacktraceLogFile
 
   /**
    * Returns the name of the file that will be uploaded
-   *
-   * @return string
    */
-  public function getName()
+  public function getName(): string
   {
     return $this->name;
   }
@@ -64,19 +58,15 @@ class BacktraceLogFile
    *
    * @throws Exception
    */
-  public function generateNewName()
+  public function generateNewName(): void
   {
     $this->name = $this->folder . "/" . bin2hex(random_bytes(20)) . ".btl";
   }
 
   /**
    * Sets the content for the file to be uploaded
-   *
-   * @param $code
-   *
-   * @return $this
    */
-  public function setFileContent($code)
+  public function setFileContent(string $code): self
   {
     $this->fileContent = $code;
 
@@ -85,21 +75,18 @@ class BacktraceLogFile
 
   /**
    * Returns the content of the backtrace file that will be uploaded
-   *
-   * @return string
    */
-  public function getFileContent()
+  public function getFileContent(): string
   {
     return $this->fileContent;
   }
 
   /**
-   * Upload the file. Returns the true if it the upload was succesful, else returns false
+   * Upload the file. Returns true if the upload was successful, else throws
    *
-   * @return bool
    * @throws UploadFailedException|FileAlreadyExistsException
    */
-  public function uploadFile()
+  public function uploadFile(): bool
   {
     $fs = new Filesystem();
 

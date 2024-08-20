@@ -311,7 +311,7 @@ abstract class AbstractExceptionHandler
     }
   }
 
-  protected function generateHash(string $url, string $exceptionMessage): string
+  protected function generateHash(string $url, ?string $exceptionMessage): string
   {
     return md5($url . $exceptionMessage);
   }
